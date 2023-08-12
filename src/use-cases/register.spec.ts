@@ -1,5 +1,24 @@
-import { expect, test } from 'vitest'
+import { expect, describe, it } from 'vitest'
+import { RegisterUseCase } from './register'
+import { compare } from 'bcryptjs'
+import { InMemoryUsersRepository } from '@/repositories/in-memory/in-memory-repository'
 
-test('check if it works', () => {
-  expect(2 + 2).toEqual(5)
+describe('Register Use Case', () => {
+  it('should hash user password upon registration', async () => {
+    const inMemoryUsersRepository = new InMemoryUsersRepository()
+    const registerUseCase = new RegisterUseCase(inMemoryUsersRepository)
+
+    const { user } = await registerUseCase.execute({
+      name: 'John Doe',
+      email: 'johndoe@example.com',
+      password: '123456',
+    })
+
+    const isPasswordCorrectlyHashed = await compare(
+      '123456',
+      user.password_hash,
+    )
+
+    expect(isPasswordCorrectlyHashed).toBe(true)
+  })
 })
